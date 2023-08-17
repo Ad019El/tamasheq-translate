@@ -31,7 +31,7 @@ export const LandingHero = () => {
         </div>
       </div>
       <div className="text-sm md:text-xl font-light text-zinc-400">
-        Translate both ways between Tamasheq and Arabic, French, and English.
+        Translate and Transcribe Tamasheq
       </div>
       <div className={cn(isSignedIn && "hidden")}>
         <Link href={isSignedIn ? "/transcription" : "/sign-up"}>

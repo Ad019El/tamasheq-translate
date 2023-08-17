@@ -4,15 +4,15 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema } from "./constants";
-import { PenLine } from "lucide-react";
+import { Mic, Pause, PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { useReactMediaRecorder } from "react-media-recorder";
 import { cn, convertArabicToLatin } from "@/lib/utils";
 
 import Heading from "@/components/heading";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
 import { Loader } from "@/components/loader";
@@ -23,7 +23,11 @@ const Dashboard = () => {
   const router = useRouter();
   const [audioData, setAudioData] = useState<Uint8Array | null>(null);
   const [transciption, setTranscription] = useState<String>("");
+  const [isRecording, setIsRecording] = useState<Boolean>(false);
+  const { status, startRecording, stopRecording, mediaBlobUrl } =
+    useReactMediaRecorder({ audio: true });
   const { toast } = useToast();
+  let recorded = useRef<Uint8Array | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,13 +36,23 @@ const Dashboard = () => {
     },
   });
 
-  const isLoading = form.formState.isSubmitting;
+  useEffect(() => {
+    if (!mediaBlobUrl) return;
+    (async () => {
+      const response = await fetch(mediaBlobUrl!);
+      const blob = await response.blob();
+      const arrayBuffer = await blob.arrayBuffer();
+      recorded.current = new Uint8Array(arrayBuffer);
+    })();
+  }, [mediaBlobUrl]);
+
+  let isLoading = form.formState.isSubmitting;
 
   const onSubmit = async () => {
     try {
-      const data = audioData;
+      const data = audioData || recorded.current;
 
-      if (audioData?.length === 0 || !audioData) {
+      if (data?.length === 0 || !data) {
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
@@ -56,6 +70,7 @@ const Dashboard = () => {
         );
 
         const result = await response.data.text;
+
         setTranscription(result);
 
         form.reset();
@@ -83,11 +98,19 @@ const Dashboard = () => {
           setAudioData(arrayBuffer);
         }
       };
-
       reader.readAsArrayBuffer(file);
     }
   };
-  // console.log(audioData);
+
+  const handleToggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+      setAudioData(null);
+    }
+    setIsRecording(!isRecording);
+  };
 
   return (
     <div>
@@ -99,6 +122,12 @@ const Dashboard = () => {
         bgColor="bg-sky-500/10"
       />
       <br />
+
+      {/* <div>
+        <p>{status}</p>
+        <button onClick={startRecording}>Start Recording</button>
+        <button onClick={stopRecording}>Stop Recording</button>
+      </div> */}
 
       <div className="px-4 lg:px-8">
         <div>
@@ -115,14 +144,19 @@ const Dashboard = () => {
                   onChange={handleFileChange}
                 />
               </div>
-
-              <Button
-                className="col-span-12 lg:col-span-2 w-full"
-                type="submit"
-                disabled={isLoading}
-              >
-                Transcribe
-              </Button>
+              <div className="col-span-12 lg:col-span-2 w-full flex space-x-2">
+                <Button className="flex-1" type="submit" disabled={isLoading}>
+                  Transcribe
+                </Button>
+                <Button
+                  variant={status == "recording" ? "destructive" : "default"}
+                  className="w-14"
+                  type="button"
+                  onClick={handleToggleRecording}
+                >
+                  {status == "recording" ? <Pause /> : <Mic />}
+                </Button>
+              </div>
             </form>
           </Form>
         </div>
@@ -135,6 +169,9 @@ const Dashboard = () => {
               )}
             />
           </audio>
+        )}
+        {mediaBlobUrl && !audioData && (
+          <audio controls className="w-full" src={mediaBlobUrl} />
         )}
 
         <div className="space-y-4 mt-4">
