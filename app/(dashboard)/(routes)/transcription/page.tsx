@@ -8,7 +8,7 @@ import { PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import axios from "axios";
-import { cn } from "@/lib/utils";
+import { cn, convertArabicToLatin } from "@/lib/utils";
 
 import Heading from "@/components/heading";
 import { Input } from "@/components/ui/input";
@@ -33,40 +33,39 @@ const Dashboard = () => {
   });
 
   const isLoading = form.formState.isSubmitting;
-  const API_TOKEN = "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";
 
   const onSubmit = async () => {
     try {
-      // const data = fs.readFileSync(values.audioFile);
       const data = audioData;
 
-      // const data = values.audioFile;
-      const response = await axios.post(
-        "https://api-inference.huggingface.co/models/ad019el/tamasheq-99-final",
-        data,
-        {
-          headers: { Authorization: `Bearer ${API_TOKEN}` },
-        }
-      );
-
-      const result = await response.data.text;
-      setTranscription(result);
-
-      form.reset();
-    } catch (error: any) {
-      if (transciption.length === 0) {
+      if (audioData?.length === 0 || !audioData) {
         toast({
           variant: "destructive",
           title: "Uh oh! Something went wrong.",
           description: "No audio selected, please try again",
         });
       } else {
-        toast({
-          variant: "destructive",
-          title: "Uh oh! Something went wrong.",
-          description: "The model is currently loading, please try again",
-        });
+        const response = await axios.post(
+          "https://api-inference.huggingface.co/models/ad019el/tamasheq-99-final",
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+            },
+          }
+        );
+
+        const result = await response.data.text;
+        setTranscription(result);
+
+        form.reset();
       }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "The model is currently loading, please try again",
+      });
     } finally {
       router.refresh();
     }
@@ -157,6 +156,14 @@ const Dashboard = () => {
           )}
         >
           {transciption}
+        </div>
+        <div
+          className={cn(
+            "rounded-lg border w-full p-4 px-3 md:px-6 focus-within:shadow-sm mt-4 bg-muted text-xl text-left",
+            !transciption && "hidden"
+          )}
+        >
+          {convertArabicToLatin(transciption)}
         </div>
       </div>
     </div>
