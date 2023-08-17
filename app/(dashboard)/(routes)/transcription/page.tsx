@@ -8,7 +8,7 @@ import { Mic, Pause, PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { useReactMediaRecorder } from "react-media-recorder";
+import { useReactMediaRecorder } from "react-media-recorder-2";
 import { cn, convertArabicToLatin } from "@/lib/utils";
 
 import Heading from "@/components/heading";
@@ -50,7 +50,7 @@ const Dashboard = () => {
       const arrayBuffer = await blob.arrayBuffer();
       recorded.current = new Uint8Array(arrayBuffer);
     })();
-  }, [mediaBlobUrl]);
+  }, [mediaBlobUrl, form]);
 
   let isLoading = form.formState.isSubmitting;
 
@@ -144,19 +144,24 @@ const Dashboard = () => {
             >
               <div className="col-span-12 max-w-xl lg:col-span-10">
                 <Input
+                  id="audioFile"
                   type="file"
                   accept="audio/*"
-                  placeholder="Upload audio file"
+                  alt="sdfg"
                   onChange={handleFileChange}
                 />
               </div>
+
               <div className="col-span-12 lg:col-span-2 w-full flex space-x-2">
                 <Button className="flex-1" type="submit" disabled={isLoading}>
                   Transcribe
                 </Button>
                 <Button
                   variant={status == "recording" ? "destructive" : "default"}
-                  className="w-14"
+                  className={cn(
+                    "w-14",
+                    status == "recording" && "animate-pulse"
+                  )}
                   type="button"
                   onClick={handleToggleRecording}
                 >
