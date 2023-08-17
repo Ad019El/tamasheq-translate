@@ -24,9 +24,11 @@ const Dashboard = () => {
   const [audioData, setAudioData] = useState<Uint8Array | null>(null);
   const [transciption, setTranscription] = useState<String>("");
   const [isRecording, setIsRecording] = useState<Boolean>(false);
+  const [audioType, setAudioType] = useState<String>("");
   const { status, startRecording, stopRecording, mediaBlobUrl } =
     useReactMediaRecorder({ audio: true });
   const { toast } = useToast();
+
   let recorded = useRef<Uint8Array | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -35,6 +37,10 @@ const Dashboard = () => {
       audioFile: null,
     },
   });
+
+  useEffect(() => {
+    (() => {})();
+  }, []);
 
   useEffect(() => {
     if (!mediaBlobUrl) return;
@@ -88,7 +94,7 @@ const Dashboard = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-
+    setAudioType("");
     if (file) {
       const reader = new FileReader();
       setAudioData(null);
@@ -96,6 +102,7 @@ const Dashboard = () => {
         if (reader.result instanceof ArrayBuffer) {
           const arrayBuffer = new Uint8Array(reader.result);
           setAudioData(arrayBuffer);
+          setAudioType(file?.name!);
         }
       };
       reader.readAsArrayBuffer(file);
@@ -104,7 +111,12 @@ const Dashboard = () => {
 
   const handleToggleRecording = () => {
     if (isRecording) {
+      setAudioType("");
       stopRecording();
+      const date = new Date();
+      const showTime =
+        date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+      setAudioType(showTime);
     } else {
       startRecording();
       setAudioData(null);
@@ -156,16 +168,24 @@ const Dashboard = () => {
         </div>
         <br />
         {audioData && (
-          <audio controls className="w-full">
-            <source
-              src={URL.createObjectURL(
-                new Blob([audioData], { type: "audio/wav" })
-              )}
-            />
-          </audio>
+          <div>
+            <p className="text-sm p-1 text-muted-foreground">{audioType}</p>
+            <audio controls className="w-full">
+              <source
+                src={URL.createObjectURL(
+                  new Blob([audioData], { type: "audio/wav" })
+                )}
+              />
+            </audio>
+          </div>
         )}
         {mediaBlobUrl && !audioData && (
-          <audio controls className="w-full" src={mediaBlobUrl} />
+          <div>
+            <p className="text-sm p-1 text-muted-foreground">
+              Audio recorded from browser [{audioType}]
+            </p>
+            <audio controls className="w-full" src={mediaBlobUrl} />
+          </div>
         )}
 
         <div className="space-y-4 mt-4">
