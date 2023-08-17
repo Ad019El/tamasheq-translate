@@ -70,7 +70,6 @@ const Dashboard = () => {
         );
 
         const result = await response.data.text;
-
         setTranscription(result);
 
         form.reset();
@@ -79,7 +78,8 @@ const Dashboard = () => {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "The model is currently loading, please try again",
+        description:
+          "The model is currently loading, please try again after a few seconds.",
       });
     } finally {
       router.refresh();
@@ -122,12 +122,6 @@ const Dashboard = () => {
         bgColor="bg-sky-500/10"
       />
       <br />
-
-      {/* <div>
-        <p>{status}</p>
-        <button onClick={startRecording}>Start Recording</button>
-        <button onClick={stopRecording}>Stop Recording</button>
-      </div> */}
 
       <div className="px-4 lg:px-8">
         <div>
