@@ -8,7 +8,7 @@ export default function Home() {
       <div className="h-full ">
         <LandingNavbar />
         <LandingHero />
-        {/* <LandingContent /> */}
+        <LandingContent />
       </div>
     </main>
   );

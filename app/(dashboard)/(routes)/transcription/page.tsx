@@ -144,6 +144,7 @@ const Dashboard = () => {
             >
               <div className="col-span-12 max-w-xl lg:col-span-10">
                 <Input
+                  disabled={isLoading}
                   id="audioFile"
                   type="file"
                   accept="audio/*"
