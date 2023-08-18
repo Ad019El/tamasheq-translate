@@ -164,6 +164,7 @@ const Dashboard = () => {
                     status == "recording" && "animate-pulse"
                   )}
                   type="button"
+                  disabled={isLoading}
                   onClick={handleToggleRecording}
                 >
                   {status == "recording" ? <Pause /> : <Mic />}
