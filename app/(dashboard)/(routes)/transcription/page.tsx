@@ -52,28 +52,34 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    if (isModelLoaded) return;
-    loadModel().catch((res) => {
-      if (res.response.status === 503) {
-        setIsModelLoaded(false);
-      } else if (res.response.status === 400) {
-        setIsModelLoaded(true);
-      }
-    });
-    !isModelLoaded
-      ? setTimeout(() => {
-          toast({
-            variant: "default",
-            title: "Yaay!",
-            description: "Model is ready",
-          });
-          setIsModelLoaded(true);
-        }, 4000)
-      : toast({
-          variant: "default",
-          title: "Yaay!",
-          description: "Model is ready",
+    (async () => {
+      if (isModelLoaded) return;
+      await loadModel()
+        .catch((res) => {
+          if (res.response.status === 503) {
+            setIsModelLoaded(false);
+          } else if (res.response.status !== 503) {
+            setIsModelLoaded(true);
+          }
+          console.log("model loaded", res.response.status);
+        })
+        .then(() => {
+          !isModelLoaded
+            ? setTimeout(() => {
+                toast({
+                  variant: "default",
+                  title: "Yaay!",
+                  description: "Model is ready",
+                });
+                setIsModelLoaded(true);
+              }, 4000)
+            : toast({
+                variant: "default",
+                title: "Yaay!",
+                description: "Model is ready",
+              });
         });
+    })();
   }, [isModelLoaded, toast]);
 
   useEffect(() => {
