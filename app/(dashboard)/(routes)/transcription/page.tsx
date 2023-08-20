@@ -1,7 +1,7 @@
 "use client";
 
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema } from "./constants";
 import { Mic, Pause, PenLine } from "lucide-react";
@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [transciption, setTranscription] = useState<String>("");
   const [isRecording, setIsRecording] = useState<Boolean>(false);
   const [audioType, setAudioType] = useState<String>("");
+  const [isModelLoaded, setIsModelLoaded] = useState<boolean>(false);
   const { status, startRecording, stopRecording, mediaBlobUrl } =
     useReactMediaRecorder({ audio: true });
   const { toast } = useToast();
@@ -38,9 +39,42 @@ const Dashboard = () => {
     },
   });
 
+  async function loadModel() {
+    return await axios.post(
+      "https://api-inference.huggingface.co/models/ad019el/tamasheq-99-final",
+      { data: "asdf" },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_TOKEN}`,
+        },
+      }
+    );
+  }
+
   useEffect(() => {
-    (() => {})();
-  }, []);
+    if (isModelLoaded) return;
+    loadModel().catch((res) => {
+      if (res.response.status === 503) {
+        setIsModelLoaded(false);
+      } else if (res.response.status === 400) {
+        setIsModelLoaded(true);
+      }
+    });
+    !isModelLoaded
+      ? setTimeout(() => {
+          toast({
+            variant: "default",
+            title: "Yaay!",
+            description: "Model is ready",
+          });
+          setIsModelLoaded(true);
+        }, 4000)
+      : toast({
+          variant: "default",
+          title: "Yaay!",
+          description: "Model is ready",
+        });
+  }, [isModelLoaded, toast]);
 
   useEffect(() => {
     if (!mediaBlobUrl) return;
@@ -144,7 +178,7 @@ const Dashboard = () => {
             >
               <div className="col-span-12 max-w-xl lg:col-span-10">
                 <Input
-                  disabled={isLoading}
+                  disabled={isLoading || !isModelLoaded}
                   id="audioFile"
                   type="file"
                   accept="audio/*"
@@ -154,7 +188,11 @@ const Dashboard = () => {
               </div>
 
               <div className="col-span-12 lg:col-span-2 w-full flex space-x-2">
-                <Button className="flex-1" type="submit" disabled={isLoading}>
+                <Button
+                  className="flex-1"
+                  type="submit"
+                  disabled={isLoading || !isModelLoaded}
+                >
                   Transcribe
                 </Button>
                 <Button
@@ -164,7 +202,7 @@ const Dashboard = () => {
                     status == "recording" && "animate-pulse"
                   )}
                   type="button"
-                  disabled={isLoading}
+                  disabled={isLoading || !isModelLoaded}
                   onClick={handleToggleRecording}
                 >
                   {status == "recording" ? <Pause /> : <Mic />}
