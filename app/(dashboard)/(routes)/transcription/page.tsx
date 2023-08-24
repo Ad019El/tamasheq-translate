@@ -23,9 +23,9 @@ const Dashboard = () => {
   const router = useRouter();
   const [audioData, setAudioData] = useState<Uint8Array | null>(null);
   const [transciption, setTranscription] = useState<String>("");
-  const [isRecording, setIsRecording] = useState<Boolean>(false);
   const [audioType, setAudioType] = useState<String>("");
   const [isModelLoaded, setIsModelLoaded] = useState<boolean>(false);
+  const [isRecording, setIsRecording] = useState<Boolean>(false);
   const { status, startRecording, stopRecording, mediaBlobUrl } =
     useReactMediaRecorder({ audio: true });
   const { toast } = useToast();
@@ -61,7 +61,7 @@ const Dashboard = () => {
           } else if (res.response.status !== 503) {
             setIsModelLoaded(true);
           }
-          console.log("model loaded", res.response.status);
+          // console.log("model loaded", res.response.status);
         })
         .then(() => {
           !isModelLoaded
@@ -90,7 +90,7 @@ const Dashboard = () => {
       const arrayBuffer = await blob.arrayBuffer();
       recorded.current = new Uint8Array(arrayBuffer);
     })();
-  }, [mediaBlobUrl, form]);
+  }, [mediaBlobUrl]);
 
   let isLoading = form.formState.isSubmitting;
 
@@ -218,6 +218,7 @@ const Dashboard = () => {
           </Form>
         </div>
         <br />
+
         {audioData && (
           <div>
             <p className="text-sm p-1 text-muted-foreground">{audioType}</p>
@@ -230,6 +231,7 @@ const Dashboard = () => {
             </audio>
           </div>
         )}
+
         {mediaBlobUrl && !audioData && (
           <div>
             <p className="text-sm p-1 text-muted-foreground">
