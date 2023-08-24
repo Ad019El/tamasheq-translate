@@ -254,6 +254,7 @@ const Dashboard = () => {
         )}
 
         <div
+          dir="rtl"
           className={cn(
             "rounded-lg border w-full p-4 px-3 md:px-6 focus-within:shadow-sm mt-4 bg-muted text-xl text-right",
             !transciption && "hidden"

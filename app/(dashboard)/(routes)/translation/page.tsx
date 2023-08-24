@@ -20,7 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { use, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import useAutosizeTextArea from "@/lib/useAutoSizeTextArea";
 import { useReactMediaRecorder } from "react-media-recorder-2";
@@ -29,8 +29,7 @@ const Dashboard = () => {
   const router = useRouter();
   const { toast } = useToast();
   const tqAutoSizeRef = useRef<HTMLTextAreaElement>(null);
-  const arAutoSizeRef = useRef<HTMLTextAreaElement>(null);
-  const [arabic, setArabic] = useState<any>("");
+  const [translation, setTranslate] = useState<any>("");
   const [tamasheq, setTamasheq] = useState<any>("");
   const [isRecording, setIsRecording] = useState<Boolean>(false);
   const { status, startRecording, stopRecording, mediaBlobUrl } =
@@ -47,7 +46,6 @@ const Dashboard = () => {
   let recorded = useRef<Uint8Array | null>(null);
 
   useAutosizeTextArea(tqAutoSizeRef.current, tamasheq);
-  useAutosizeTextArea(arAutoSizeRef.current, arabic);
 
   useEffect(() => {
     if (!mediaBlobUrl) return;
@@ -58,9 +56,6 @@ const Dashboard = () => {
       recorded.current = new Uint8Array(arrayBuffer);
     })();
   }, [mediaBlobUrl]);
-
-  console.log(tamasheq);
-  console.log(arabic);
 
   const onSubmit = async () => {
     const data = tamasheq;
@@ -83,7 +78,7 @@ const Dashboard = () => {
           }
         );
         const result = await response.data[0].generated_text;
-        setArabic(result);
+        setTranslate(result);
       }
     } catch (error: any) {
       toast({
@@ -223,51 +218,16 @@ const Dashboard = () => {
                 />
               </div>
               <div className="col-span-12 md:col-span-6">
-                <FormField
-                  control={form.control}
-                  name="arText"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Arabic</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Textarea
-                            dir="rtl"
-                            disabled={isLoading}
-                            placeholder=""
-                            className="text-lg text-right h-32 pl-8 overflow-hidden resize-none"
-                            {...field}
-                            ref={arAutoSizeRef}
-                            value={arabic}
-                            onChange={(e) => setArabic(e.target.value)}
-                          />
-                          <X
-                            className={cn(
-                              "text-black/80 absolute top-3 left-2 cursor-pointer",
-                              arabic.length === 0 && "hidden",
-                              isLoading && "cursor-not-allowed"
-                            )}
-                            onClick={() => {
-                              if (!isLoading) {
-                                setArabic("");
-                                arAutoSizeRef.current!.style.height = "128px";
-                              }
-                            }}
-                          />
-                          <p
-                            className={cn(
-                              "absolute bottom-2 right-2 text-sm text-muted-foreground",
-                              arabic.length > 500 && "text-red-500"
-                            )}
-                          >
-                            {arabic.length}/500
-                          </p>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                <FormLabel>Arabic</FormLabel>
+                <div
+                  dir="rtl"
+                  style={{ height: tqAutoSizeRef.current?.style.height }}
+                  className={cn(
+                    "rounded-lg border w-full p-4 px-3 md:px-6 focus-within:shadow-sm mt-2 bg-muted text-xl text-right"
                   )}
-                />
+                >
+                  {translation}
+                </div>
               </div>
 
               <Button
