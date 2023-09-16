@@ -41,7 +41,7 @@ const Dashboard = () => {
 
   async function loadModel() {
     return await axios.post(
-      "https://api-inference.huggingface.co/models/ad019el/tamasheq-99-final",
+      "https://api-inference.huggingface.co/models/ad019el/tamasheq-99-2",
       { data: "asdf" },
       {
         headers: {
@@ -106,7 +106,7 @@ const Dashboard = () => {
         });
       } else {
         const response = await axios.post(
-          "https://api-inference.huggingface.co/models/ad019el/tamasheq-99-final",
+          "https://api-inference.huggingface.co/models/ad019el/tamasheq-99-2",
           data,
           {
             headers: {
