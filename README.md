@@ -1,6 +1,6 @@
 # TamaLinguist Platform
 
-TamaLinguist Platform is a web application built with Next.js 13, React, Tailwind CSS, Clerk, and Shadcn/ui. It offers features for Automatic Speech Recognition (ASR) and Machine Translation (MT) for the Tamasheq language.
+TamaLinguist Platform is a web application built with Next.js 13, React, Tailwind CSS, Clerk, and Shadcn/ui. It offers Automatic Speech Recognition (ASR) and Machine Translation (MT) for the Tamasheq language.
 
 ## Features
 
